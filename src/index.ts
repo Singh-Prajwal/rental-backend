@@ -11,9 +11,21 @@ dotenv.config();
 connectDB();
 
 const app = express();
-
+const allowedOrigins = [
+  'http://localhost:3000', // Your local frontend for development
+  'https://rental-frontend-3irp.vercel.app' // Your deployed Vercel frontend
+];
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (allowedOrigins.indexOf(origin!) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+};
 // Middleware
-app.use(cors()); // Allow requests from our frontend
+app.use(cors(corsOptions)); // Allow requests from our frontend
 app.use(express.json()); // To parse JSON bodies
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/properties', propertyRoutes);

@@ -6,9 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "seed": "ts-node src/seeder.ts",
-    "build": "tsc && npm run render-postbuild",
-    "render-postbuild":"ls -R",
-    "start": "node build/index.js"
+    "build": "tsc",
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
