@@ -1,0 +1,63 @@
+# render.yaml
+# Blueprint for the Digital Guidebook Platform
+
+services:
+  # ------------------
+  # Backend Web Service
+  # ------------------
+  - type: web
+    name: digital-guidebook-backend
+    env: node
+    # The root directory for this service, relative to the repo root.
+    rootDir: backend
+    # Commands are run from the rootDir.
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm start"
+    # Health check to ensure the server is up before deployment is considered successful.
+    healthCheckPath: /api/health
+    envVars:
+      - key: DB_URL
+        # This creates a secret in Render's dashboard.
+        # You must set its value in the dashboard once.
+        fromSecret: DB_URL
+      - key: JWT_SECRET
+        fromSecret: JWT_SECRET
+      - key: PORT
+        value: 3000
+      - key: EMAIL_HOST
+        fromSecret: EMAIL_HOST
+      - key: EMAIL_PORT
+        fromSecret: EMAIL_PORT
+      - key: EMAIL_USER
+        fromSecret: EMAIL_USER
+      - key: EMAIL_PASS
+        fromSecret: EMAIL_PASS
+      - key: EMAIL_FROM
+        fromSecret: EMAIL_FROM
+      # You can add your EMAIL_* variables here as secrets too.
+
+  # --------------------
+  # Frontend Web Service
+  # --------------------
+  - type: web
+    name: digital-guidebook-frontend
+    env: static # It's a static site, but Vercel/Netlify are often better for this.
+                 # If you were to host it on Render, this is how you'd do it.
+    rootDir: frontend
+    buildCommand: "npm install && npm run build"
+    # Serve the contents of the 'dist' folder.
+    staticPublishPath: ./dist
+    # Add a rewrite rule for single-page applications (SPA).
+    # This ensures that refreshing on a nested route (e.g., /stays/123) still works.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      # This is how the frontend knows the backend's URL at build time.
+      - key: VITE_API_BASE_URL
+        # This special syntax pulls the URL from our backend service.
+        fromService:
+          type: web
+          name: digital-guidebook-backend
+          property: url
